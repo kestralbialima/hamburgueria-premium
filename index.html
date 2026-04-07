@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sua Hamburgueria - Alta Performance Web</title>
+    <!-- Tailwind CSS para estilização rápida e moderna -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome para ícones profissionais -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesque:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-orange: #FF4500; /* Laranja Chama */
+            --dark-industrial: #0a0a0a;
+            --whatsapp-green: #25D366;
+        }
+
+        body {
+            font-family: 'Space Grotesque', sans-serif;
+            background-color: #0f0f0f;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .font-impact {
+            font-family: 'Bebas Neue', cursive;
+            letter-spacing: 2px;
+        }
+
+        /* Animação de Revelação ao Rolar (Scroll Reveal) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Efeito de Brilho e Elevação nos Botões */
+        .btn-glow:hover {
+            box-shadow: 0 0 25px var(--primary-orange);
+            transform: translateY(-2px);
+        }
+
+        /* Cores de Marca */
+        .text-orange-flame { color: var(--primary-orange); }
+        .bg-orange-flame { background-color: var(--primary-orange); }
+
+        /* Estilo do Menu de Categorias Ativo */
+        .nav-link.active {
+            color: white !important;
+            border-bottom: 3px solid var(--primary-orange);
+            opacity: 1 !important;
+        }
+
+        /* Animação de "Pulo" do Carrinho */
+        @keyframes cartPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+        .animate-pop { animation: cartPop 0.3s ease-out; }
+
+        /* Animação de Pulso do WhatsApp */
+        @keyframes shadow-pulse {
+            0% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0.4); }
+            70% { box-shadow: 0 0 0 20px rgba(37, 211, 102, 0); }
+            100% { box-shadow: 0 0 0 0px rgba(37, 211, 102, 0); }
+        }
+        .animate-wpp-pulse { animation: shadow-pulse 2s infinite; }
+
+        /* Animação do Marcador do Mapa */
+        @keyframes pin-pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pin { animation: pin-pulse 2s infinite ease-in-out; }
+
+        /* Scrollbar Personalizada Premium */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-orange); border-radius: 10px; }
+
+        .hero-section { min-height: 60vh; }
+
+        /* Mapa Estilizado para Portfólio */
+        .custom-map {
+            background-color: #121212;
+            background-image: radial-gradient(#2a2a2a 1px, transparent 1px);
+            background-size: 30px 30px;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+        .custom-map:hover { border-color: rgba(255, 69, 0, 0.3); }
+
+        /* Interatividade nos Botões de Pagamento */
+        .payment-option.active {
+            border-color: var(--primary-orange) !important;
+            background-color: rgba(255, 69, 0, 0.1) !important;
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.2);
+            color: white;
+        }
+        .payment-option .check-icon {
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .payment-option.active .check-icon { opacity: 1; transform: scale(1); }
+
+        .no-click-decoration { pointer-events: none; }
+
+        html { scroll-behavior: smooth; }
+    </style>
+</head>
+<body class="pb-10">
+
+    <!-- Navbar Fixa -->
+    <nav class="bg-black/90 backdrop-blur-xl sticky top-0 z-[100] border-b border-white/10 h-[72px] flex items-center">
+        <div class="container mx-auto px-6 flex justify-between items-center">
+            <div class="flex items-center gap-2 group cursor-pointer" onclick="resetToHome()">
+                <div class="bg-orange-flame p-2 rounded-lg group-hover:rotate-12 transition-transform shadow-[0_0_15px_rgba(255,69,0,0.4)]">
+                    <i class="fas fa-burger text-white text-xl"></i>
+                </div>
+                <h1 class="text-2xl font-impact uppercase tracking-wider">Sua <span class="text-orange-flame">Hamburgueria</span></h1>
+            </div>
+            
+            <button onclick="toggleCart()" class="relative p-3 bg-white/5 hover:bg-orange-flame rounded-full transition-all group border border-white/10">
+                <i class="fas fa-shopping-basket text-xl text-white"></i>
+                <span id="cart-count" class="absolute -top-1 -right-1 bg-white text-black text-[10px] font-bold rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section relative flex items-center justify-center overflow-hidden py-24 text-center">
+        <div class="absolute inset-0 bg-gradient-to-b from-orange-600/10 to-transparent z-0 no-click-decoration"></div>
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-orange-flame/5 blur-[150px] rounded-full no-click-decoration"></div>
+        
+        <div class="container mx-auto px-6 z-10">
+            <div class="reveal active flex flex-col items-center">
+                <span class="text-orange-flame font-bold tracking-[0.5em] uppercase text-xs mb-6 block animate-pulse">Tecnologia & Experiência</span>
+                <h2 class="text-6xl md:text-9xl font-impact leading-[0.85] mb-6 uppercase">
+                    VELOCIDADE QUE <br> <span class="text-orange-flame">VOCÊ SENTE.</span>
+                </h2>
+                <p class="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl leading-relaxed font-light">
+                    Imagine sua hamburgueria com este sistema rápido e eficiente 🚀. <br class="hidden md:block">
+                    A melhor experiência web do mercado, desenhada para converter.
+                </p>
+                <div class="flex gap-4">
+                    <button onclick="scrollToMenu()" class="btn-glow bg-orange-flame text-white font-bold py-5 px-14 rounded-2xl transition-all uppercase text-sm tracking-[0.2em] shadow-lg">
+                        Explorar Cardápio
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Navegação de Categorias -->
+    <div id="category-nav" class="sticky top-[72px] bg-black/95 backdrop-blur-md z-50 border-y border-white/5 py-5">
+        <div class="container mx-auto px-4 flex gap-6 md:gap-12 justify-center">
+            <button onclick="filterContent('burgers')" id="btn-burgers" class="nav-link font-bold text-xs md:text-sm uppercase tracking-widest text-gray-500 hover:text-white transition-all pb-1 whitespace-nowrap border-b-2 border-transparent opacity-70">Burgers</button>
+            <button onclick="filterContent('combos')" id="btn-combos" class="nav-link font-bold text-xs md:text-sm uppercase tracking-widest text-gray-500 hover:text-white transition-all pb-1 whitespace-nowrap border-b-2 border-transparent opacity-70">Combos</button>
+            <button onclick="filterContent('bebidas')" id="btn-bebidas" class="nav-link font-bold text-xs md:text-sm uppercase tracking-widest text-gray-500 hover:text-white transition-all pb-1 whitespace-nowrap border-b-2 border-transparent opacity-70">Bebidas</button>
+        </div>
+    </div>
+
+    <!-- Menu Principal Dinâmico -->
+    <main id="menu-container" class="container mx-auto px-6 py-20 space-y-20">
+        <!-- Renderizado via JavaScript -->
+    </main>
+
+    <!-- Localização (Map Placeholder Premium) -->
+    <section id="location" class="container mx-auto px-6 py-20 z-20 relative reveal">
+        <div class="flex items-center gap-6 mb-12">
+            <h2 class="text-4xl md:text-5xl font-impact text-white uppercase tracking-widest">Localização</h2>
+            <div class="h-[1px] flex-grow bg-gradient-to-r from-orange-flame to-transparent opacity-30"></div>
+        </div>
+        
+        <div onclick="window.open('https://www.google.com/maps/search/?api=1&query=Pra%C3%A7a+Tiradentes+Curitiba', '_blank')" 
+             class="custom-map w-full h-[400px] rounded-[3rem] border border-white/5 shadow-2xl relative flex items-center justify-center group overflow-hidden">
+            
+            <div class="absolute inset-0 opacity-10 no-click-decoration">
+                <div class="absolute top-1/2 w-full h-[2px] bg-white"></div>
+                <div class="absolute left-1/2 w-[2px] h-full bg-white"></div>
+            </div>
+
+            <div class="relative flex items-center justify-center">
+                <div class="absolute w-12 h-12 bg-orange-flame/30 rounded-full animate-pin"></div>
+                <div class="w-5 h-5 bg-orange-flame rounded-full border-4 border-white shadow-[0_0_20px_var(--primary-orange)] relative z-10"></div>
+            </div>
+
+            <div class="absolute bottom-8 text-center w-full px-6">
+                <p class="text-white font-bold text-xs tracking-[0.3em] uppercase mb-2">Unidade Centro Histórico</p>
+                <p class="text-gray-500 text-[10px] uppercase mb-4">Praça Tiradentes, S/N - Curitiba, PR</p>
+                <span class="bg-white/5 border border-white/10 px-4 py-2 rounded-full text-[9px] font-black uppercase tracking-widest text-orange-flame group-hover:bg-orange-flame group-hover:text-white transition-all">
+                    Clique para Abrir Mapa Real
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Barra de Redes Sociais -->
+    <section class="container mx-auto px-6 py-20 z-20 relative reveal">
+        <div class="bg-zinc-900/40 backdrop-blur-2xl border border-white/5 rounded-[3rem] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl">
+            <div class="text-center md:text-left">
+                <p class="text-orange-flame text-xs font-bold uppercase tracking-[0.4em] mb-2">Conecte-se</p>
+                <h3 class="text-3xl md:text-4xl font-impact uppercase text-white">Siga nossas Redes</h3>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 w-full md:w-auto">
+                <a href="#" class="flex items-center justify-center gap-3 bg-white/5 hover:bg-orange-flame border border-white/10 py-4 px-8 rounded-2xl transition-all group min-w-[180px]">
+                    <i class="fab fa-instagram text-2xl text-orange-flame group-hover:text-white transition-colors"></i>
+                    <span class="font-bold text-xs tracking-widest uppercase">Instagram</span>
+                </a>
+                <a href="#" class="flex items-center justify-center gap-3 bg-white/5 hover:bg-blue-600 border border-white/10 py-4 px-8 rounded-2xl transition-all group min-w-[180px]">
+                    <i class="fab fa-facebook text-2xl text-blue-500 group-hover:text-white transition-colors"></i>
+                    <span class="font-bold text-xs tracking-widest uppercase">Facebook</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão Flutuante WhatsApp -->
+    <div class="fixed bottom-6 right-6 z-[120] flex flex-col items-end">
+        <div id="wpp-tooltip" class="bg-white text-black text-[10px] font-bold py-2 px-4 rounded-xl shadow-2xl mb-3 opacity-0 translate-y-4 transition-all duration-500 uppercase tracking-widest relative pointer-events-none">
+            Dúvidas? Fale conosco!
+            <div class="absolute -bottom-1 right-5 w-2 h-2 bg-white rotate-45"></div>
+        </div>
+        <a href="https://wa.me/5541999999999" target="_blank" class="bg-[#25D366] text-white w-14 h-14 rounded-full flex items-center justify-center shadow-[0_10px_30px_rgba(37,211,102,0.4)] hover:scale-110 active:scale-95 transition-all animate-wpp-pulse">
+            <i class="fab fa-whatsapp text-3xl"></i>
+        </a>
+    </div>
+
+    <!-- Footer Assinado -->
+    <footer class="bg-zinc-950 border-t border-white/5 py-16 text-center">
+        <div class="container mx-auto px-6">
+            <h3 class="font-impact text-4xl mb-4 text-white tracking-widest uppercase">Sua <span class="text-orange-flame">Logo</span></h3>
+            <div class="space-y-2 mb-8">
+                <p class="text-gray-400 text-[11px] uppercase tracking-[0.3em] font-bold">Desenvolvido por <span class="text-white">Core Build</span></p>
+                <p class="text-orange-flame text-[9px] uppercase tracking-[0.4em] animate-pulse">Este projeto está disponível e aguarda um dono.</p>
+            </div>
+            <p class="text-gray-600 text-[10px] uppercase tracking-widest font-bold">Curitiba - PR // Performance Web</p>
+        </div>
+    </footer>
+
+    <!-- Carrinho Lateral -->
+    <div id="cart-drawer" class="fixed inset-0 bg-black/90 z-[130] hidden backdrop-blur-sm transition-opacity">
+        <div class="fixed right-0 top-0 h-full w-full max-w-md bg-zinc-900 shadow-2xl flex flex-col transform translate-x-full transition-transform duration-500 border-l border-white/10" id="cart-content">
+            <div class="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <h3 class="text-xl font-impact text-white uppercase tracking-widest">Seu Pedido</h3>
+                <button onclick="toggleCart()" class="text-3xl text-gray-500 hover:text-orange-flame transition">&times;</button>
+            </div>
+            <div id="cart-items" class="flex-grow overflow-y-auto p-4 space-y-3 no-scrollbar"></div>
+            
+            <!-- Checkout Mobile-Ready -->
+            <div class="p-4 pb-12 bg-black/60 border-t border-white/10 space-y-4">
+                <div class="grid grid-cols-2 gap-2">
+                    <button onclick="setPayment('Pix')" id="pay-pix" class="payment-option border border-white/10 bg-white/5 rounded-xl py-2 px-1 flex items-center justify-center gap-2 font-bold transition-all active:scale-95 text-[10px] tracking-tighter uppercase relative group">
+                        <i class="fas fa-qrcode text-orange-flame text-sm group-hover:scale-110 transition-transform"></i> PIX
+                        <i class="fas fa-check-circle check-icon absolute -top-1 -right-1 text-orange-flame text-[10px] bg-white rounded-full"></i>
+                    </button>
+                    <button onclick="setPayment('Cartão')" id="pay-card" class="payment-option border border-white/10 bg-white/5 rounded-xl py-2 px-1 flex items-center justify-center gap-2 font-bold transition-all active:scale-95 text-[10px] tracking-tighter uppercase relative group">
+                        <i class="fas fa-credit-card text-orange-flame text-sm group-hover:scale-110 transition-transform"></i> CARTÃO
+                        <i class="fas fa-check-circle check-icon absolute -top-1 -right-1 text-orange-flame text-[10px] bg-white rounded-full"></i>
+                    </button>
+                </div>
+                <div class="flex justify-between items-center border-b border-white/5 pb-2">
+                    <span class="text-gray-500 font-bold uppercase text-[9px] tracking-widest">Subtotal</span>
+                    <span id="cart-total" class="text-2xl font-impact text-orange-flame tracking-tighter">R$ 0,00</span>
+                </div>
+                <div class="grid grid-cols-1 gap-2">
+                    <input type="text" id="cust-name" placeholder="NOME" class="w-full py-2.5 px-4 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-orange-flame text-[11px] transition-all uppercase tracking-widest">
+                    <div class="relative flex items-center">
+                        <input type="text" id="cust-address" placeholder="ENDEREÇO DE ENTREGA" class="w-full py-2.5 pl-4 pr-10 bg-white/5 border border-white/10 rounded-xl outline-none focus:border-orange-flame text-[11px] transition-all uppercase tracking-widest">
+                        <button onclick="getUserLocation()" id="gps-btn" title="Localização Atual" class="absolute right-3 text-orange-flame hover:scale-110 transition-transform cursor-pointer">
+                            <i id="gps-icon" class="fas fa-location-arrow"></i>
+                        </button>
+                    </div>
+                </div>
+                <button onclick="checkoutWhatsApp()" class="w-full bg-orange-flame text-white font-bold py-4 mb-4 rounded-xl shadow-[0_0_20px_rgba(255,69,0,0.3)] hover:brightness-125 transition-all flex items-center justify-center gap-2 uppercase tracking-widest text-[11px]">
+                    <i class="fab fa-whatsapp text-xl"></i> Finalizar Pedido
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados Estruturados dos Produtos
+        const products = [
+            { id: 1, category: 'burgers', name: 'Ultra Smash', price: 29.00, desc: 'Dois patties de 80g, queijo duplo e molho secreto.', img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400&q=80', isHighlight: true },
+            { id: 2, category: 'burgers', name: 'Bacon Experience', price: 38.00, desc: 'Pão brioche, blend 180g e muito bacon.', img: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=400&q=80', isHighlight: false },
+            { id: 3, category: 'combos', name: 'Combo Master', price: 55.00, desc: 'Burger + Batata com Trufas + Bebida 500ml.', img: 'https://images.unsplash.com/photo-1610614819513-58e34989848b?w=400&q=80', isHighlight: true },
+            { id: 4, category: 'combos', name: 'Double Trouble', price: 92.00, desc: '2 Smash Burgers + 2 Batatas P + 1 Refri 2L.', img: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=400&q=80', isHighlight: false },
+            { id: 5, category: 'bebidas', name: 'Soda Italiana', price: 14.00, desc: 'Artesanal: Morango ou Maçã Verde.', img: 'https://images.unsplash.com/photo-1513558161293-cdaf76589fd8?w=400&q=80', isHighlight: false },
+            { id: 6, category: 'bebidas', name: 'Shake Premium', price: 22.00, desc: 'Baunilha real e cookies triturados.', img: 'https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400&q=80', isHighlight: true }
+        ];
+
+        let cart = [];
+        let paymentMethod = null;
+
+        // Observer para Animações de Revelação
+        const revealObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+
+        // Lógica de Localização Atual via GPS (OpenStreetMap Reverse Geocoding)
+        async function getUserLocation() {
+            const icon = document.getElementById('gps-icon');
+            const input = document.getElementById('cust-address');
+            if (!navigator.geolocation) return alert("Navegador não suporta GPS.");
+            
+            icon.classList.remove('fa-location-arrow');
+            icon.classList.add('fa-spinner', 'fa-spin');
+            
+            navigator.geolocation.getCurrentPosition(async (position) => {
+                try {
+                    const { latitude, longitude } = position.coords;
+                    const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`);
+                    const data = await response.json();
+                    if (data && data.address) {
+                        const street = data.address.road || "";
+                        const num = data.address.house_number || "S/N";
+                        const sub = data.address.suburb || "";
+                        input.value = `${street}, ${num} - ${sub}`.toUpperCase();
+                    }
+                } catch (e) {
+                    alert("Erro ao buscar endereço.");
+                } finally {
+                    icon.classList.remove('fa-spinner', 'fa-spin');
+                    icon.classList.add('fa-location-arrow');
+                }
+            }, () => {
+                alert("GPS desativado pelo usuário.");
+                icon.classList.remove('fa-spinner', 'fa-spin');
+                icon.classList.add('fa-location-arrow');
+            });
+        }
+
+        // Função para Renderizar o Cardápio com Filtro
+        function renderMenu(filterType = 'highlights') {
+            const container = document.getElementById('menu-container');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            navLinks.forEach(link => link.classList.remove('active'));
+            if(filterType !== 'highlights') {
+                const activeBtn = document.getElementById(`btn-${filterType}`);
+                if(activeBtn) activeBtn.classList.add('active');
+            }
+
+            let filtered = products.filter(p => filterType === 'highlights' ? p.isHighlight : p.category === filterType);
+            let title = filterType === 'highlights' ? "Os Mais Pedidos" : {burgers:"Burgers", combos:"Combos", bebidas:"Bebidas"}[filterType];
+
+            container.innerHTML = `
+                <section class="category-section reveal active">
+                    <div class="flex items-center gap-6 mb-8">
+                        <h2 id="current-category-title" class="text-4xl md:text-5xl font-impact text-white uppercase tracking-widest">${title}</h2>
+                        <div class="h-[1px] flex-grow bg-gradient-to-r from-orange-flame to-transparent opacity-30"></div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        ${filtered.map(p => {
+                            const inCartItem = cart.find(item => item.id === p.id);
+                            const qty = inCartItem ? inCartItem.quantity : 0;
+                            return `
+                            <div class="bg-zinc-900/30 rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-orange-flame/40 transition-all duration-500 flex flex-col group relative z-10">
+                                <div class="overflow-hidden relative h-44 no-click-decoration">
+                                    <img src="${p.img}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 grayscale-[0.2] group-hover:grayscale-0">
+                                </div>
+                                <div class="p-5 flex-grow">
+                                    <div class="flex flex-col mb-3">
+                                        <h3 class="font-bold text-lg text-white uppercase tracking-tight truncate">${p.name}</h3>
+                                        <span class="text-orange-flame font-impact text-2xl tracking-tighter mt-1">R$ ${p.price.toFixed(2)}</span>
+                                    </div>
+                                    <p class="text-gray-500 text-[10px] leading-relaxed font-light line-clamp-2">${p.desc}</p>
+                                </div>
+                                <div class="p-5 pt-0">
+                                    <button id="btn-${p.id}" onclick="addToCart(${p.id})" class="w-full bg-white/5 text-white hover:bg-orange-flame font-bold py-3.5 rounded-2xl transition-all flex items-center justify-center gap-3 uppercase text-[9px] tracking-[0.2em] border border-white/10 hover:border-transparent cursor-pointer relative z-20">
+                                        <i class="fas fa-plus text-xs"></i> ADICIONAR ${qty > 0 ? '('+qty+')' : ''}
+                                    </button>
+                                </div>
+                            </div>
+                        `}).join('')}
+                    </div>
+                </section>
+            `;
+            document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+        }
+
+        // Lógica de Adicionar ao Carrinho Blindada
+        function addToCart(id) {
+            const productId = parseInt(id);
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) existingItem.quantity++;
+            else cart.push({ ...product, quantity: 1 });
+
+            // Feedback Visual Imediato
+            const btn = document.getElementById(`btn-${productId}`);
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-check"></i> NO CARRINHO';
+                btn.classList.add('!bg-green-600', '!text-white');
+                setTimeout(() => {
+                    const currentQty = cart.find(i => i.id === productId)?.quantity || 0;
+                    if (btn) {
+                        btn.innerHTML = `<i class="fas fa-plus text-xs"></i> ADICIONAR ${currentQty > 0 ? '('+currentQty+')' : ''}`;
+                        btn.classList.remove('!bg-green-600', '!text-white');
+                    }
+                }, 800);
+            }
+
+            const countLabel = document.getElementById('cart-count');
+            countLabel.classList.remove('animate-pop');
+            void countLabel.offsetWidth; 
+            countLabel.classList.add('animate-pop');
+            updateCartUI();
+        }
+
+        // Atualização da Interface do Carrinho
+        function updateCartUI() {
+            const cartItems = document.getElementById('cart-items');
+            const cartCount = document.getElementById('cart-count');
+            const cartTotal = document.getElementById('cart-total');
+            const totalItems = cart.reduce((acc, curr) => acc + curr.quantity, 0);
+            cartCount.innerText = totalItems;
+            cartCount.classList.toggle('hidden', totalItems === 0);
+
+            if(cart.length === 0) {
+                cartItems.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-700 opacity-20 py-20"><i class="fas fa-shopping-basket text-6xl mb-4"></i><p class="font-bold uppercase tracking-[0.5em] text-[10px]">CARRINHO VAZIO</p></div>`;
+            } else {
+                cartItems.innerHTML = cart.map(item => `
+                    <div class="flex items-center gap-3 bg-white/5 p-3 rounded-2xl border border-white/5 transition-all hover:bg-white/10">
+                        <img src="${item.img}" class="w-10 h-10 rounded-lg object-cover border border-white/5">
+                        <div class="flex-grow min-w-0">
+                            <h4 class="font-bold text-white text-[10px] uppercase truncate tracking-wider">${item.name}</h4>
+                            <p class="text-orange-flame font-black text-xs">R$ ${(item.price * item.quantity).toFixed(2)}</p>
+                            <div class="flex items-center gap-2 mt-1">
+                                <button onclick="changeQty(${item.id}, -1)" class="w-5 h-5 flex items-center justify-center bg-white/10 rounded-lg text-[9px] hover:bg-orange-flame transition">-</button>
+                                <span class="text-[9px] font-bold w-4 text-center">${item.quantity}</span>
+                                <button onclick="changeQty(${item.id}, 1)" class="w-5 h-5 flex items-center justify-center bg-white/10 rounded-lg text-[9px] hover:bg-orange-flame transition">+</button>
+                            </div>
+                        </div>
+                        <button onclick="removeItem(${item.id})" class="text-gray-600 hover:text-red-500 transition p-2"><i class="fas fa-trash-alt text-xs"></i></button>
+                    </div>
+                `).join('');
+            }
+            const total = cart.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+            cartTotal.innerText = `R$ ${total.toFixed(2)}`;
+            
+            // Sincroniza botões na lista principal
+            products.forEach(p => {
+                const btn = document.getElementById(`btn-${p.id}`);
+                if (btn && !btn.innerHTML.includes('NO CARRINHO')) {
+                    const item = cart.find(i => i.id === p.id);
+                    btn.innerHTML = `<i class="fas fa-plus text-xs"></i> ADICIONAR ${item ? '('+item.quantity+')' : ''}`;
+                }
+            });
+        }
+
+        function changeQty(id, delta) {
+            const item = cart.find(i => i.id === Number(id));
+            if (item) {
+                item.quantity += delta;
+                if(item.quantity <= 0) removeItem(id);
+                else updateCartUI();
+            }
+        }
+
+        function removeItem(id) { cart = cart.filter(item => item.id !== Number(id)); updateCartUI(); }
+
+        // Função de Scroll Otimizada (Gancho Absoluto)
+        function scrollToMenu() {
+            const title = document.getElementById('current-category-title');
+            if (!title) return;
+            const y = title.getBoundingClientRect().top + window.pageYOffset - 164;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+        }
+
+        function filterContent(category) { renderMenu(category); setTimeout(scrollToMenu, 10); }
+
+        function resetToHome() { renderMenu('highlights'); window.scrollTo({top: 0, behavior: 'smooth'}); }
+
+        function toggleCart() {
+            const drawer = document.getElementById('cart-drawer');
+            const content = document.getElementById('cart-content');
+            if(drawer.classList.contains('hidden')) {
+                drawer.classList.remove('hidden');
+                setTimeout(() => content.classList.remove('translate-x-full'), 10);
+            } else {
+                content.classList.add('translate-x-full');
+                setTimeout(() => drawer.classList.add('hidden'), 500);
+            }
+        }
+
+        function setPayment(method) {
+            paymentMethod = method;
+            document.querySelectorAll('.payment-option').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = method === 'Pix' ? document.getElementById('pay-pix') : document.getElementById('pay-card');
+            if(activeBtn) activeBtn.classList.add('active');
+        }
+
+        function checkoutWhatsApp() {
+            const name = document.getElementById('cust-name').value;
+            const addr = document.getElementById('cust-address').value;
+            if(!cart.length || !name || !addr || !paymentMethod) return alert("Por favor, preencha todos os dados.");
+            let msg = `*--- 🍔 PEDIDO: SUA HAMBURGUERIA ---*%0ACLIENTE: ${name.toUpperCase()}%0AENTREGA: ${addr.toUpperCase()}%0APAGAMENTO: ${paymentMethod.toUpperCase()}%0A%0A*ITENS:*%0A`;
+            cart.forEach(i => msg += `• ${i.quantity}x ${i.name} (R$ ${(i.price * i.quantity).toFixed(2)})%0A`);
+            const total = cart.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+            msg += `%0A*TOTAL: R$ ${total.toFixed(2)}*`;
+            window.open(`https://api.whatsapp.com/send?phone=5541999999999&text=${msg}`, '_blank');
+        }
+
+        // Timer Tooltip do WhatsApp
+        setTimeout(() => {
+            const tooltip = document.getElementById('wpp-tooltip');
+            if(tooltip) {
+                tooltip.classList.remove('opacity-0', 'translate-y-4');
+                tooltip.classList.add('opacity-100', 'translate-y-0');
+                setTimeout(() => {
+                    tooltip.classList.remove('opacity-100', 'translate-y-0');
+                    tooltip.classList.add('opacity-0', 'translate-y-4');
+                }, 2000);
+            }
+        }, 3000);
+
+        // Inicialização
+        window.onload = () => renderMenu('highlights');
+    </script>
+</body>
+</html>
